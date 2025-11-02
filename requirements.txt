@@ -12,3 +12,5 @@ openai
 random
 matplotlib
 tempfile
+bs4
+matplotlib
