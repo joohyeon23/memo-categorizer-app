@@ -36,15 +36,15 @@ from bs4 import BeautifulSoup
 # 0. 初期設定とDB準備
 # ----------------------------------------------------
 # requirements.txt の依存関係を自動でpip installする関数
-def install_requirements():
-    requirements_path = "requirements.txt"
-    if os.path.exists(requirements_path):
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", requirements_path])
+#def install_requirements():
+#    requirements_path = "requirements.txt"
+#    if os.path.exists(requirements_path):
+#        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", requirements_path])
 
 # Streamlit デバッグなどで再実行されても無駄な再installを避ける
-if "requirements_installed" not in st.session_state:
-    install_requirements()
-    st.session_state["requirements_installed"] = True
+#if "requirements_installed" not in st.session_state:
+#    install_requirements()
+#    st.session_state["requirements_installed"] = True
 
 # カテゴリの色マッピング (識別できれば何でも良い)
 CATEGORY_COLORS = {
