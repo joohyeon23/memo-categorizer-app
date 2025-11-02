@@ -8,6 +8,10 @@ from pyvis.network import Network
 import tempfile
 import os
 from dotenv import load_dotenv
+import tempfile
+import random
+import matplotlib.colors as mcolors
+
 
 # LangChain関連
 from langchain_openai import ChatOpenAI
@@ -18,6 +22,19 @@ from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_classic.chains import RetrievalQA
+
+CATEGORY_COLORS = {
+    "食べ物": "#FF7F50",   # Coral
+    "仕事": "#4682B4",     # Steel Blue
+    "AI勉強": "#3CB371",   # Medium Sea Green
+    "資格": "#FFD700",     # Gold
+    "ダンス": "#FF69B4",   # Hot Pink
+    "日記": "#A9A9A9",     # Dark Gray
+    "お金": "#DAA520",     # Goldenrod
+    "語学勉強": "#9370DB", # Medium Purple
+    "その他": "#696969",   # Dim Gray
+    "自動分類": "#000000"  # Black
+}
 
 # .envファイルの読み込み
 load_dotenv()
@@ -42,6 +59,14 @@ CREATE TABLE IF NOT EXISTS memos (
     url TEXT,
     category TEXT
 )''')
+c.execute('''
+CREATE TABLE IF NOT EXISTS memo_relations (
+    memo_id_a INTEGER,
+    memo_id_b INTEGER,
+    PRIMARY KEY (memo_id_a, memo_id_b),
+    FOREIGN KEY (memo_id_a) REFERENCES memos(id) ON DELETE CASCADE,
+    FOREIGN KEY (memo_id_b) REFERENCES memos(id) ON DELETE CASCADE
+)''')
 conn.commit()
 
 st.header("📝 メモ・URL 登録")
@@ -52,7 +77,10 @@ default_categories = ["食べ物", "仕事", "AI勉強", "資格", "ダンス", 
 # サイドバーでカテゴリの自由編集
 st.sidebar.subheader("カテゴリ管理")
 new_category = st.sidebar.text_input("新しいカテゴリを追加")
-if st.sidebar.button("カテゴリ追加") and new_category:
+if st.sidebar.button("カテゴリ追加") and new_category and new_category not in default_categories:
+    random_color = f'#{random.randint(0, 0xFFFFFF):06x}'
+    CATEGORY_COLORS[new_category] = random_color
+    
     default_categories.append(new_category)
     st.sidebar.success(f"カテゴリ '{new_category}' を追加しました！")
 
