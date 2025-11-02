@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_classic.agents import create_react_agent, AgentExecutor
 from langchain_classic.prompts import PromptTemplate
-from langchain.tools import tool
+from langchain_classic.tools import Tool
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -50,23 +50,43 @@ conn.commit()
 
 st.header("📝 メモ・URL 登録")
 
+# 既存カテゴリの読み込み（DBか固定リスト）
+default_categories = ["食べ物", "仕事", "AI勉強", "資格", "ダンス", "日記", "お金", "語学勉強", "その他"]
+
+# サイドバーでカテゴリの自由編集
+st.sidebar.subheader("カテゴリ管理")
+new_category = st.sidebar.text_input("新しいカテゴリを追加")
+if st.sidebar.button("カテゴリ追加") and new_category:
+    default_categories.append(new_category)
+    st.sidebar.success(f"カテゴリ '{new_category}' を追加しました！")
+
 with st.form("memo_form"):
     memo_text = st.text_area("メモ内容")
     memo_url = st.text_input("URL（任意）")
+    selected_category = st.selectbox("カテゴリを選択（自動分類も可）", ["自動分類"] + default_categories)
     submit_btn = st.form_submit_button("登録")
 
     if submit_btn and memo_text:
-        # カテゴリ分類用プロンプトを文字列ではなくメッセージ形式で渡すことも可能
-        category_prompt = (f"以下のメモを主要カテゴリの1つに分類してください。"
-                           "候補: 食べ物, RAG, 資格, , 投資, 趣味, その他\n"
-                           f"メモ: {memo_text}\n出力はカテゴリ名のみ。")
-        # invokeは文字列でOK
-        cat = llm.invoke(category_prompt).content.strip()
-        c.execute("INSERT INTO memos (content, url, category) VALUES (?, ?, ?)", (memo_text, memo_url, cat))
-        conn.commit()
-        st.success(f"✅ 登録完了！（カテゴリ: {cat}）")
+        if selected_category == "自動分類":
+            # カテゴリ分類プロンプト
+            category_prompt = f"""
+以下のメモを主要カテゴリの1つに分類してください。
+候補: {', '.join(default_categories)}
+メモ: {memo_text}
+出力はカテゴリ名のみ。
+"""
+            cat = llm.invoke(category_prompt).content.strip()
+        else:
+            cat = selected_category
 
-st.subheader("📂 登録済みメモ")
+        c.execute(
+            "INSERT INTO memos (content, url, category) VALUES (?, ?, ?)",
+            (memo_text, memo_url, cat)
+        )
+        conn.commit()
+        st.success(f"登録完了！（カテゴリ: {cat}）")
+
+st.subheader("登録済みメモ")
 df = pd.read_sql_query("SELECT * FROM memos", conn)
 st.dataframe(df)
 
@@ -105,7 +125,7 @@ if not df.empty:
     )
 
     tools = [
-        tool(
+        Tool(
             name="KnowledgeBaseQA",
             func=qa_chain.run,
             description="メモDBに基づく質問応答を行うツール。カテゴリや内容の要約、関係性などを答える。"
@@ -114,14 +134,28 @@ if not df.empty:
 
     react_prompt = PromptTemplate.from_template("""
 あなたはユーザーのメモデータベースを管理するアシスタントです。
-ユーザーの質問に対して、カテゴリや内容を理解し、必要に応じてKnowledgeBaseQAツールを使って答えてください。
+ユーザーの質問に答える際は、次の手順で考えてください：
+
+1. ユーザーの質問をカテゴリや内容に基づいて理解
+2. 関連するメモをKnowledgeBaseQAツールで検索
+3. サマリーや要点を整理し、分かりやすく出力
+4. 必要に応じてアクション（Action）としてツールを呼び出す
+5. 最終回答（Final Answer）としてユーザーに伝える
 
 フォーマット:
-Thought: ...
-Action: ...
-Action Input: ...
-Observation: ...
-Final Answer: ...
+Thought: 今考えていることや推論
+Action: 使うツール名（必要な場合）
+Action Input: ツールに渡す入力
+Observation: ツールの出力結果
+Final Answer: ユーザーへの最終回答（明確・簡潔）
+
+例:
+Human: 健康カテゴリの要約を見せて
+Thought: 健康カテゴリに関連するメモを抽出し要約する必要がある
+Action: KnowledgeBaseQA
+Action Input: カテゴリ: 健康
+Observation: （ツールの要約結果）
+Final Answer: 健康カテゴリのメモの要約は以下です...
 
 Human: {input}
 """)
@@ -129,12 +163,12 @@ Human: {input}
     agent = create_react_agent(llm, tools, prompt=react_prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-    user_query = st.text_input("💬 Agentに質問（例：「健康カテゴリの要約を見せて」）")
+    user_query = st.text_input("Agentに質問（例：「健康カテゴリの要約を見せて」）")
 
     if st.button("送信") and user_query:
-        with st.spinner("🤔 考え中..."):
+        with st.spinner("考え中..."):
             response = agent_executor.invoke({"input": user_query})
-            st.markdown("### 🧩 回答")
+            st.markdown("### 回答")
             st.success(response["output"])
 else:
     st.info("まだメモが登録されていません。")
