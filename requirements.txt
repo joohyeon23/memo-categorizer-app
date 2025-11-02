@@ -10,6 +10,5 @@ langchain-openai
 faiss-cpu
 openai
 matplotlib
-tempfile
 bs4
 matplotlib
