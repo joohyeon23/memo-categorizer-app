@@ -90,6 +90,26 @@ st.subheader("登録済みメモ")
 df = pd.read_sql_query("SELECT * FROM memos", conn)
 st.dataframe(df)
 
+st.subheader("🗑️ メモの削除")
+
+# DBからメモを取得
+df = pd.read_sql_query("SELECT * FROM memos", conn)
+
+# multiselectで削除対象を選択
+to_delete = st.multiselect(
+    "削除するメモを選択",
+    options=df["id"].tolist(),
+    format_func=lambda x: df[df["id"] == x]["content"].values[0]
+)
+
+if st.button("削除"):
+    if to_delete:
+        c.executemany("DELETE FROM memos WHERE id=?", [(i,) for i in to_delete])
+        conn.commit()
+        st.success(f"{len(to_delete)}件のメモを削除しました！")
+    else:
+        st.warning("削除するメモを選択してください。")
+
 st.subheader("🕸️ メモの関係性グラフ")
 
 if not df.empty:
