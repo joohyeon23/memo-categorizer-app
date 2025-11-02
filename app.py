@@ -25,7 +25,7 @@ import sys
 import urllib.request
 
 import tempfile
-import random
+#import random
 import matplotlib.colors as mcolors
 # URLメタデータ取得のために追加
 import requests
