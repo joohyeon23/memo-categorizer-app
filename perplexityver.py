@@ -1,9 +1,5 @@
 import subprocess
 import sys
-
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-
-
 import streamlit as st
 import sqlite3
 import pandas as pd
