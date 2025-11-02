@@ -9,7 +9,6 @@ langchain-community
 langchain-openai
 faiss-cpu
 openai
-random
 matplotlib
 tempfile
 bs4
