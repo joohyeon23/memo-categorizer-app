@@ -132,9 +132,10 @@ if not df.empty:
         )
     ]
 
-    react_prompt = PromptTemplate.from_template("""
+    react_prompt = PromptTemplate(
+    template="""
 あなたはユーザーのメモデータベースを管理するアシスタントです。
-ユーザーの質問に答える際は、次の手順で考えてください：
+ユーザーの質問に答える際は、以下の手順で考えてください：
 
 1. ユーザーの質問をカテゴリや内容に基づいて理解
 2. 関連するメモをKnowledgeBaseQAツールで検索
@@ -147,18 +148,16 @@ Thought: 今考えていることや推論
 Action: 使うツール名（必要な場合）
 Action Input: ツールに渡す入力
 Observation: ツールの出力結果
-Final Answer: ユーザーへの最終回答（明確・簡潔）
+Final Answer: ユーザーへの最終回答
 
-例:
-Human: 健康カテゴリの要約を見せて
-Thought: 健康カテゴリに関連するメモを抽出し要約する必要がある
-Action: KnowledgeBaseQA
-Action Input: カテゴリ: 健康
-Observation: （ツールの要約結果）
-Final Answer: 健康カテゴリのメモの要約は以下です...
+{agent_scratchpad}
 
-Human: {input}
-""")
+ユーザーの質問: {input}
+利用可能なツール: {tools}
+ツール名一覧: {tool_names}
+""",
+    input_variables=["input", "agent_scratchpad", "tools", "tool_names"]
+)
 
     agent = create_react_agent(llm, tools, prompt=react_prompt)
     agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
