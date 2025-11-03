@@ -617,11 +617,11 @@ if not df_graph.empty:
     )
 
     tools = [
-        Tool(
-            name="KnowledgeBaseQA",
-            func=qa_chain.run,
-            description="メモDBに基づく質問応答を行うツール。カテゴリや内容の要約、関係性などを答える。"
-        )
+        {
+        "name": "KnowledgeBaseQA",
+        "func": lambda input: qa_chain.run(input),
+        "description": "メモDBに基づく質問応答を行うツール。カテゴリや内容の要約、関係性などを答える。"
+        }
     ]
 
     react_prompt = PromptTemplate(
@@ -632,8 +632,6 @@ if not df_graph.empty:
 1. ユーザーの質問をカテゴリや内容に基づいて理解
 2. 関連するメモをKnowledgeBaseQAツールで検索
 3. サマリーや要点を整理し、分かりやすく出力
-4. 必要に応じてアクション（Action）としてツールを呼び出す
-5. 最終回答（Final Answer）としてユーザーに伝える
 
 フォーマット:
 Thought: 今考えていることや推論
