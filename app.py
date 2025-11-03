@@ -12,12 +12,12 @@ import random
 from langchain_openai import ChatOpenAI
 from langchain_classic.agents import create_react_agent, AgentExecutor
 from langchain_classic.prompts import PromptTemplate
-from langchain.tools import Tool
+#from langchain.tools import Tool
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_classic.chains import RetrievalQA
-#from langchain_core.tools import tool
+from langchain_core.tools import tool
 
 
 
