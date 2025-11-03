@@ -12,12 +12,12 @@ import random
 from langchain_openai import ChatOpenAI
 from langchain_classic.agents import create_react_agent, AgentExecutor
 from langchain_classic.prompts import PromptTemplate
-#from langchain.tools import tool
+from langchain.tools import Tool
 from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_classic.chains import RetrievalQA
-from langchain_core.tools import tool
+#from langchain_core.tools import tool
 
 
 
@@ -617,7 +617,7 @@ if not df_graph.empty:
     )
 
     tools = [
-        tool(
+        Tool(
             name="KnowledgeBaseQA",
             func=qa_chain.run,
             description="メモDBに基づく質問応答を行うツール。カテゴリや内容の要約、関係性などを答える。"
