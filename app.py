@@ -6,6 +6,7 @@ from pyvis.network import Network
 import tempfile
 import os
 from dotenv import load_dotenv
+import random
 
 # LangChain関連
 from langchain_openai import ChatOpenAI
@@ -49,14 +50,14 @@ from bs4 import BeautifulSoup
 # カテゴリの色マッピング (識別できれば何でも良い)
 CATEGORY_COLORS = {
     "食べ物": "#FF7F50",   # Coral
-    "仕事": "#4682B4",     # Steel Blue
+    "qiita記事関連": "#4682B4",     # Steel Blue
     "AI勉強": "#3CB371",   # Medium Sea Green
     "資格": "#FFD700",     # Gold
     "ダンス": "#FF69B4",   # Hot Pink
-    "日記": "#A9A9A9",     # Dark Gray
+    "日記メモ": "#A9A9A9",     # Dark Gray
     "お金": "#DAA520",     # Goldenrod
     "語学勉強": "#9370DB", # Medium Purple
-    "その他": "#696969",   # Dim Gray
+    "仕事関連": "#696969",   # Dim Gray
     "自動分類": "#000000"  # Black
 }
 
