@@ -618,7 +618,7 @@ if not df_graph.empty:
 
     tools = [
         tool(
-            f="KnowledgeBaseQA",
+            name="KnowledgeBaseQA",
             func=qa_chain.run,
             description="メモDBに基づく質問応答を行うツール。カテゴリや内容の要約、関係性などを答える。"
         )
